@@ -5,6 +5,7 @@
 
 cur_date=$(date +%Y-%m-%d:%H:%M:%S)
 back_dir=/home/zabbix_backup/
+log=${back_dir}backup_${cur_date}.log
 user=root
 passwd=1qazxdr5
 
@@ -12,28 +13,34 @@ if ! [ -d $back_dir ]; then
 mkdir $back_dir
 fi
 
-echo "-= Start BackUp MariaDB =-" &> ${back_dir}backup_${cur_date}.log
+echo "-= Start BackUp MariaDB =-" &> $log
 
-mariabackup --backup --target-dir=${back_dir}zbackup_${cur_date}/ --user=$user --password=$passwd  &>> ${back_dir}backup_${cur_date}.log
+mariabackup --backup --target-dir=${back_dir}zbackup_${cur_date}/ --user=$user --password=$passwd  &>> $log
 
-echo "-= End BackUp MariaDB =-" &>> ${back_dir}backup_${cur_date}.log
+echo "-= End BackUp MariaDB =-" &>> $log
 
-echo "-= Start archive BackUp  =-" &>> ${back_dir}backup_${cur_date}.log
+echo "-= Start archive BackUp  =-" &>> $log
 
-tar -czvf ${back_dir}zbackup_${cur_date}.tgz ${back_dir}zbackup_${cur_date} &>> ${back_dir}backup_${cur_date}.log
+tar -czvf ${back_dir}zbackup_${cur_date}.tgz ${back_dir}zbackup_${cur_date} &>> $log
 
-echo "-= End archive BackUp  =-" &>> ${back_dir}backup_${cur_date}.log
+echo "-= End archive BackUp  =-" &>> $log
 
-echo "-= Remove BackUp directory =-" &>> ${back_dir}backup_${cur_date}.log
+echo "-= BackUp /etc/zabbix & /usr/share/zabbix =-" &>> $log
 
-rm -rf ${back_dir}zbackup_${cur_date}  &>> ${back_dir}backup_${cur_date}.log
+tar -czvf ${back_dir}z_etc_usr_backup_${cur_date}.tgz /etc/zabbix/ /usr/share/zabbix &>> $log
 
-echo "-= Remove BackUp directory OK =-" &>> ${back_dir}backup_${cur_date}.log
+echo "-= End BackUp /etc/zabbix & /usr/share/zabbix =-" &>> $log
 
-echo "-= Remove backup archives over 15 days =-" &>> ${back_dir}backup_${cur_date}.log
+echo "-= Remove BackUp directory =-" &>> $log
 
-find $back_dir -type f -mtime +7 -exec rm -rf {} \; &>> ${back_dir}backup_${cur_date}.log
+rm -rf ${back_dir}zbackup_${cur_date}  &>> $log
 
-echo "-= Remove backup archives over 7 days OK =-" &>> ${back_dir}backup_${cur_date}.log
+echo "-= Remove BackUp directory OK =-" &>> $log
 
-echo "-= End BackUp MariaDB =-" &>> ${back_dir}backup_${cur_date}.log
+echo "-= Remove backup archives over 7 days =-" &>> $log
+
+find $back_dir -type f -mtime +7 -exec rm -rf {} \; &>> $log
+
+echo "-= Remove backup archives over 7 days OK =-" &>> $log
+
+echo "-= End BackUp MariaDB =-" &>> $log
