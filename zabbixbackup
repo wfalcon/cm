@@ -1,0 +1,39 @@
+#!/bin/bash
+#Author F@lcOn, make 03.2020
+#Скрипт делает бэкап MariaDB на лету не блокируя базы
+#restore https://mariadb.com/kb/en/full-backup-and-restore-with-mariabackup/ 
+
+cur_date=$(date +%Y-%m-%d:%H:%M:%S)
+back_dir=/home/zabbix_backup/
+user=root
+passwd=1qazxdr5
+
+if ! [ -d $back_dir ]; then
+mkdir $back_dir
+fi
+
+echo "-= Start BackUp MariaDB =-" &> ${back_dir}backup_${cur_date}.log
+
+mariabackup --backup --target-dir=${back_dir}zbackup_${cur_date}/ --user=$user --password=$passwd  &>> ${back_dir}backup_${cur_date}.log
+
+echo "-= End BackUp MariaDB =-" &>> ${back_dir}backup_${cur_date}.log
+
+echo "-= Start archive BackUp  =-" &>> ${back_dir}backup_${cur_date}.log
+
+tar -czvf ${back_dir}zbackup_${cur_date}.tgz ${back_dir}zbackup_${cur_date} &>> ${back_dir}backup_${cur_date}.log
+
+echo "-= End archive BackUp  =-" &>> ${back_dir}backup_${cur_date}.log
+
+echo "-= Remove BackUp directory =-" &>> ${back_dir}backup_${cur_date}.log
+
+rm -rf ${back_dir}zbackup_${cur_date}  &>> ${back_dir}backup_${cur_date}.log
+
+echo "-= Remove BackUp directory OK =-" &>> ${back_dir}backup_${cur_date}.log
+
+echo "-= Remove backup archives over 15 days =-" &>> ${back_dir}backup_${cur_date}.log
+
+find $back_dir -type f -mtime +7 -exec rm -rf {} \; &>> ${back_dir}backup_${cur_date}.log
+
+echo "-= Remove backup archives over 7 days OK =-" &>> ${back_dir}backup_${cur_date}.log
+
+echo "-= End BackUp MariaDB =-" &>> ${back_dir}backup_${cur_date}.log
